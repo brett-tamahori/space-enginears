@@ -1,0 +1,77 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\repos\\space-enginears\\BaseStatus\\BaseStatus.csproj": {}
+  },
+  "projects": {
+    "C:\\repos\\space-enginears\\BaseStatus\\BaseStatus.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\repos\\space-enginears\\BaseStatus\\BaseStatus.csproj",
+        "projectName": "BaseStatus",
+        "projectPath": "C:\\repos\\space-enginears\\BaseStatus\\BaseStatus.csproj",
+        "packagesPath": "C:\\Users\\VRC PC\\.nuget\\packages\\",
+        "outputPath": "C:\\repos\\space-enginears\\BaseStatus\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\VRC PC\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netframework48"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "targetAlias": "netframework48",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net48": {
+          "targetAlias": "netframework48",
+          "dependencies": {
+            "Mal.Mdk2.PbAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.1.16, )"
+            },
+            "Mal.Mdk2.PbPackager": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.2.5, )"
+            },
+            "Mal.Mdk2.References": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.2.8, )"
+            },
+            "Microsoft.NETFramework.ReferenceAssemblies": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.315\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
