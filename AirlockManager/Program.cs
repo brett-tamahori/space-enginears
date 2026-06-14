@@ -33,23 +33,21 @@ namespace IngameScript
         const string AIRLOCK_INNER_TAG = "Airlock Inner Tag";
         const string AIRLOCK_OUTER_TAG = "Airlock Outer Tag";
 
-        const string RUN_ACTION_NAME = "Run";
-
         MyIni _ini = new MyIni();
 
         string _airlockGroupTag = "[Airlock]";
         string _airlockInnerTag = "[Inner]";
         string _airlockOuterTag = "[Outer]";
 
-        List<AirLock> _airlocks;
-
-        IMyDoor _door;
+        Dictionary<String, AirLock> _airlocks;
 
         public Program()
         {
+            PrintToScreen("", false);
+
             LoadIni();
 
-            _airlocks = new List<AirLock>();
+            _airlocks = new Dictionary<String, AirLock>();
             List<IMyBlockGroup> airlockGroups = new List<IMyBlockGroup>();
 
             GridTerminalSystem.GetBlockGroups(airlockGroups, group => group.Name.Contains(_airlockGroupTag));
@@ -57,19 +55,9 @@ namespace IngameScript
             foreach (IMyBlockGroup group in airlockGroups)
             {
                 AirLock airlock = new AirLock(this, group);
-                _airlocks.Add(airlock);
+                _airlocks.Add(airlock.Name, airlock);
 
                 Echo($"Found airlock: {airlock.Name}: {airlock}");
-            }
-
-            List<ITerminalAction> actions = new List<ITerminalAction>();
-            Me.GetActions(actions);
-
-            PrintToScreen($"Panel {Me.CustomName} - Action Count: {actions.Count}", false);
-
-            foreach (ITerminalAction action in actions)
-            {
-                PrintToScreen($"  {action.Name}");
             }
 
             Runtime.UpdateFrequency = UpdateFrequency.Update10;
@@ -96,48 +84,34 @@ namespace IngameScript
             {
                 Me.CustomData = iniOutput;
             }
-
-            string doorName = _ini.Get("demo", "door").ToString();
-
-            if (doorName != null)
-            {
-                _door = GridTerminalSystem.GetBlockWithName(doorName) as IMyDoor;
-
-                if (_door == null)
-                    Echo($"No door named {doorName}");
-            }
-            else
-                Echo($"No output panel defined under demo/door");
         }
 
         public void Main(string argument, UpdateType updateSource)
         {
-            //PrintToScreen($"Started with args: {argument}, type: {updateSource}\n");
-
-            if (_door != null)
+            switch (updateSource)
             {
-                switch (updateSource)
-                {
-                    case UpdateType.Trigger:
-                        CycleDoor(_door);
+                case UpdateType.Trigger:
+                    //PrintToScreen($"Called: {argument}");
 
-                        break;
-                    case UpdateType.Update10:
-                        CheckDoor(_door);
+                    AirLock airlock = _airlocks[argument];
 
-                        break;
-                }
+                    if (airlock != null)
+                        airlock.StartCycle();
+                    else
+                        PrintToScreen($"Error: Could not find airlock for '{argument}'");
+
+                    break;
+                case UpdateType.Update10:
+                    foreach (AirLock updateAirlock in _airlocks.Values)
+                        updateAirlock.UpdateState();
+
+                    break;
             }
         }
 
         void PrintToScreen(String text, bool append = true)
         {
             Me.GetSurface(0).WriteText(text + '\n', append);
-        }
-
-        ITerminalAction RunAction()
-        {
-            return Me.GetActionWithName(RUN_ACTION_NAME);
         }
 
         void CycleDoor(IMyDoor door)
@@ -155,56 +129,45 @@ namespace IngameScript
             }
         }
 
-        void CheckDoor(IMyDoor door)
-        {
-            if (door.Enabled && (DoorStatus.Closed == door.Status || DoorStatus.Open == door.Status))
-            {
-                door.Enabled = false;
-            }
-        }
-
         public class AirLock
         {
             IMyBlockGroup _group;
+            List<IMyDoor> _doors;
             List<IMyDoor> _innerDoors;
             List<IMyDoor> _outerDoors;
-            List<IMyButtonPanel> _buttons;
+
+            AirlockStatus _status = AirlockStatus.In;
 
             public AirLock(Program parent, IMyBlockGroup group)
             {
                 _group = group;
 
+                _doors = new List<IMyDoor>();
                 _innerDoors = new List<IMyDoor>();
                 _outerDoors = new List<IMyDoor>();
-                _buttons = new List<IMyButtonPanel>();
 
-                // parent.PrintToScreen(Name, false);
-                // parent.PrintToScreen("");
-                // parent.PrintToScreen($"Airlock Tag: {parent._airlockGroupTag}");
-                // parent.PrintToScreen($"Inner Tag: {parent._airlockInnerTag}");
-                // parent.PrintToScreen($"Outer Tag: {parent._airlockOuterTag}");
-                // parent.PrintToScreen("");
+                List<IMyDoor> doors = new List<IMyDoor>();
 
-                List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
+                group.GetBlocksOfType<IMyDoor>(doors);
 
-                group.GetBlocks(blocks);
-
-                foreach (IMyTerminalBlock block in blocks)
+                foreach (IMyDoor door in doors)
                 {
-                    // parent.PrintToScreen($"{block.CustomName}");
+                    _doors.Add(door);
 
-                    IMyDoor door = block as IMyDoor;
-                    IMyButtonPanel button = block as IMyButtonPanel;
-
-                    if (door != null)
-                        if (door.CustomName.Contains(parent._airlockInnerTag))
-                            _innerDoors.Add(door);
-                        else if (door.CustomName.Contains(parent._airlockOuterTag))
-                            _outerDoors.Add(door);
-
-                    if (button != null)
-                        _buttons.Add(button);
+                    if (door.CustomName.Contains(parent._airlockInnerTag))
+                        _innerDoors.Add(door);
+                    else if (door.CustomName.Contains(parent._airlockOuterTag))
+                        _outerDoors.Add(door);
                 }
+
+                // parent.PrintToScreen("Airlock", false);
+
+                // foreach (IMyDoor door in _doors)
+                //     parent.PrintToScreen($"  Door {door.CustomName}");
+                // foreach (IMyDoor door in _innerDoors)
+                //     parent.PrintToScreen($"  Inner Door {door.CustomName}");
+                // foreach (IMyDoor door in _outerDoors)
+                //     parent.PrintToScreen($"  Outer Door {door.CustomName}");
             }
 
             public String Name
@@ -212,9 +175,141 @@ namespace IngameScript
                 get { return _group.Name; }
             }
 
+            /* If the airlock is in either end-state, then swtich to the matching 'closing' state and close all door. */
+            public void StartCycle()
+            {
+                switch (_status)
+                {
+                    case AirlockStatus.In:
+                        _status = AirlockStatus.InClosing;
+
+                        foreach (IMyDoor door in _doors)
+                            if (DoorStatus.Open == door.Status)
+                            {
+                                door.Enabled = true;
+                                door.CloseDoor();
+                            }
+
+                        break;
+                    case AirlockStatus.Out:
+                        _status = AirlockStatus.OutClosing;
+
+                        foreach (IMyDoor door in _doors)
+                            if (DoorStatus.Open == door.Status)
+                            {
+                                door.Enabled = true;
+                                door.CloseDoor();
+                            }
+
+                        break;
+                }
+            }
+
+            public void UpdateState()
+            {
+                /* Any doors that have finished moving should be powered down. */
+                foreach (IMyDoor door in _doors)
+                    switch (door.Status)
+                    {
+                        case DoorStatus.Closed:
+                        case DoorStatus.Open:
+                            door.Enabled = false;
+
+                            break;
+                    }
+
+                /* If already in an end state, nothing else needs to be done and we can exit. */
+                /* If in a closing state, if all doors are closed move to the matching sealed state, otherwise exit. */
+                /* If in a sealed state, move the status to the opposed opening state. */
+                /* If in an opening state, start opening any direction door; if all door are open move to the matching end state, otherwise exit */
+                switch (_status)
+                {
+                    case AirlockStatus.In:
+                    case AirlockStatus.Out:
+                        return;
+                    case AirlockStatus.InClosing:
+                        if (CheckDoorStatus(DoorStatus.Closed, _doors))
+                            _status = AirlockStatus.InSealed;
+
+                        return;
+                    case AirlockStatus.OutClosing:
+                        if (CheckDoorStatus(DoorStatus.Closed, _doors))
+                            _status = AirlockStatus.OutSealed;
+
+                        return;
+                    case AirlockStatus.InSealed:
+                        _status = AirlockStatus.OutOpening;
+
+                        return;
+                    case AirlockStatus.OutSealed:
+                        _status = AirlockStatus.InOpening;
+
+                        return;
+                    case AirlockStatus.InOpening:
+                        foreach (IMyDoor door in _innerDoors)
+                        {
+                            if (DoorStatus.Closed == door.Status)
+                            {
+                                door.Enabled = true;
+                                door.OpenDoor();
+                            }
+                        }
+
+                        if (CheckDoorStatus(DoorStatus.Open, _innerDoors))
+                            _status = AirlockStatus.In;
+
+                        return;
+                    case AirlockStatus.OutOpening:
+                        foreach (IMyDoor door in _outerDoors)
+                        {
+                            if (DoorStatus.Closed == door.Status)
+                            {
+                                door.Enabled = true;
+                                door.OpenDoor();
+                            }
+                        }
+
+                        if (CheckDoorStatus(DoorStatus.Open, _outerDoors))
+                            _status = AirlockStatus.Out;
+
+                        return;
+                }
+            }
+
+            private Boolean CheckDoorStatus(DoorStatus status, List<IMyDoor> doors)
+            {
+                bool isStatus = true;
+
+                foreach (IMyDoor door in doors)
+                    if (door.Status != status)
+                        isStatus = false;
+
+                return isStatus;
+            }
+
             public override string ToString()
             {
-                return $"{_group.Name} - Inner: {_innerDoors.Count}, Outer: {_outerDoors.Count}, Buttons: {_buttons.Count}";
+                return $"{_group.Name} - Inner: {_innerDoors.Count}, Outer: {_outerDoors.Count}";
+            }
+
+            private enum AirlockStatus
+            {
+                /* Inner open, outer closed. */
+                In,
+                /* Inner closing, outer closed. */
+                InClosing,
+                /* Inner closed, outer closed, moving to out. */
+                InSealed,
+                /* Inner closed, outer opening. */
+                OutOpening,
+                /* Inner closed, outer open. */
+                Out,
+                /* Inner closed, outer closing. */
+                OutClosing,
+                /* Inner closed, outer closed, moving to in. */
+                OutSealed,
+                /* Inner opening, outer closed. */
+                InOpening
             }
         }
     }
