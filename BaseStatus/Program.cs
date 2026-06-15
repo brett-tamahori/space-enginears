@@ -1,6 +1,8 @@
-﻿using Sandbox.Game.EntityComponents;
+﻿using Sandbox.Game.Entities.Cube;
+using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI.Ingame;
 using Sandbox.ModAPI.Interfaces;
+using SpaceEngineers.Game.Entities.Blocks;
 using SpaceEngineers.Game.ModAPI.Ingame;
 using System;
 using System.Collections;
@@ -27,8 +29,20 @@ namespace IngameScript
         const string VENT_GROUP_TAG = "Base Internal Vents";
         const string VENT_STATUS_GROUP_TAG = "Vent Status Lights";
 
+        const string VENT_LIGHT_COLOR_NORMAL = "Vent Status Light Color - Normal";
+        const string VENT_LIGHT_COLOR_WARNING = "Vent Status Light Color - Warning";
+
         const string PRODUCER_GROUP_TAG = "Base Producers";
         const string PRODUCER_STATUS_GROUP_TAG = "Producer Status Lights";
+
+        const string VENT_LIGHT_COLOR_NORMAL_DEFAULT = "#ffffff";
+        const string VENT_LIGHT_COLOR_WARNING_DEFAULT = "#ff0000";
+
+        const string LIGHT_DETECTOR_NAME = "Light Detector Name";
+        const string LIGHT_DETECTOR_PERCENT = "Light Detector Percent";
+        const string LIGHT_DETECTOR_CONTROLLED_GROUP_TAG = "Light Detector Controlled Group";
+
+        const decimal LARGE_GRID_SOLAR_PANEL_MW = 0.16m;
 
         MyIni _ini = new MyIni();
 
@@ -43,8 +57,17 @@ namespace IngameScript
         List<IMyProductionBlock> _producers;
         List<IMyFunctionalBlock> _producerStausBlocks;
 
-        Color _ventStatusLightColorDepressurised = Color.Red;
-        Color _ventStatusLightColorPressurised = Color.White;
+        Color _ventLightColorNormal = Color.White;
+        Color _ventLightColorWarning = Color.Red;
+
+        string _lightDetectorName = "Light Detector";
+        decimal _lightDetectorPercent = 0.5m;
+        IMySolarPanel _lightDetector;
+        float _lightRequiredPower = 1;
+        string _lightDetectorControlledGroupTag = "Light Detector Blocks";
+        List<IMyFunctionalBlock> _lightDetectorControlled;
+
+        List<string> _statusList;
 
         public Program()
         {
@@ -66,11 +89,44 @@ namespace IngameScript
             _ventStatusGroupTag = _ini.Get(INI_SECTION_GENERAL, VENT_STATUS_GROUP_TAG).ToString(_ventStatusGroupTag);
             _ini.Set(INI_SECTION_GENERAL, VENT_STATUS_GROUP_TAG, _ventStatusGroupTag);
 
+            string ventLightColorNormalString = _ini.Get(INI_SECTION_GENERAL, VENT_LIGHT_COLOR_NORMAL).ToString(VENT_LIGHT_COLOR_NORMAL_DEFAULT);
+            Color? testVentLightColorNormal = ColorExtensions.FromHtml(ventLightColorNormalString);
+
+            if (testVentLightColorNormal.HasValue)
+            {
+                _ventLightColorNormal = testVentLightColorNormal.Value;
+                _ini.Set(INI_SECTION_GENERAL, VENT_LIGHT_COLOR_NORMAL, ventLightColorNormalString);
+            }
+            else
+                _ini.Set(INI_SECTION_GENERAL, VENT_LIGHT_COLOR_NORMAL, VENT_LIGHT_COLOR_NORMAL_DEFAULT);
+
+            string ventLightColorWarningString = _ini.Get(INI_SECTION_GENERAL, VENT_LIGHT_COLOR_WARNING).ToString(VENT_LIGHT_COLOR_WARNING_DEFAULT);
+            Color? testVentLightWarning = ColorExtensions.FromHtml(ventLightColorWarningString);
+
+            if (testVentLightWarning.HasValue)
+            {
+                _ventLightColorWarning = testVentLightWarning.Value;
+                _ini.Set(INI_SECTION_GENERAL, VENT_LIGHT_COLOR_WARNING, ventLightColorWarningString);
+            }
+            else
+                _ini.Set(INI_SECTION_GENERAL, VENT_LIGHT_COLOR_WARNING, VENT_LIGHT_COLOR_WARNING_DEFAULT);
+
             _producerGroupTag = _ini.Get(INI_SECTION_GENERAL, PRODUCER_GROUP_TAG).ToString(_producerGroupTag);
             _ini.Set(INI_SECTION_GENERAL, PRODUCER_GROUP_TAG, _producerGroupTag);
 
             _producerStatusGroupTag = _ini.Get(INI_SECTION_GENERAL, PRODUCER_STATUS_GROUP_TAG).ToString(_producerStatusGroupTag);
             _ini.Set(INI_SECTION_GENERAL, PRODUCER_STATUS_GROUP_TAG, _producerStatusGroupTag);
+
+            _lightDetectorName = _ini.Get(INI_SECTION_GENERAL, LIGHT_DETECTOR_NAME).ToString(_lightDetectorName);
+            _ini.Set(INI_SECTION_GENERAL, LIGHT_DETECTOR_NAME, _lightDetectorName);
+
+            _lightDetectorPercent = _ini.Get(INI_SECTION_GENERAL, LIGHT_DETECTOR_PERCENT).ToDecimal(_lightDetectorPercent);
+            _ini.Set(INI_SECTION_GENERAL, LIGHT_DETECTOR_PERCENT, _lightDetectorPercent);
+
+            _lightRequiredPower = (float)(LARGE_GRID_SOLAR_PANEL_MW * _lightDetectorPercent);
+
+            _lightDetectorControlledGroupTag = _ini.Get(INI_SECTION_GENERAL, LIGHT_DETECTOR_CONTROLLED_GROUP_TAG).ToString(_lightDetectorControlledGroupTag);
+            _ini.Set(INI_SECTION_GENERAL, LIGHT_DETECTOR_CONTROLLED_GROUP_TAG, _lightDetectorControlledGroupTag);
 
             string iniOutput = _ini.ToString();
 
@@ -89,6 +145,7 @@ namespace IngameScript
             _ventLights = new List<IMyLightingBlock>();
             _producers = new List<IMyProductionBlock>();
             _producerStausBlocks = new List<IMyFunctionalBlock>();
+            _lightDetectorControlled = new List<IMyFunctionalBlock>();
 
             foreach (IMyBlockGroup group in groups)
             {
@@ -100,15 +157,30 @@ namespace IngameScript
                     group.GetBlocksOfType<IMyProductionBlock>(_producers);
                 else if (group.Name.Contains(_producerStatusGroupTag))
                     group.GetBlocksOfType<IMyFunctionalBlock>(_producerStausBlocks);
+                else if (group.Name.Contains(_lightDetectorControlledGroupTag))
+                    group.GetBlocksOfType<IMyFunctionalBlock>(_lightDetectorControlled);
             }
 
-            Echo($"Found {_vents.Count} vents, {_ventLights.Count} vent lights, {_producers.Count} producers, and {_producerStausBlocks.Count} producer status blocks.");
+            _lightDetector = GridTerminalSystem.GetBlockWithName(_lightDetectorName) as IMySolarPanel;
+
+            Echo($"Found {_vents.Count} vents, {_ventLights.Count} vent lights, {_producers.Count} producers, " +
+            $", {_producerStausBlocks.Count} producer status blocks, and {_lightDetectorControlled.Count} light detector blocks.");
         }
 
         public void Main(string argument, UpdateType updateSource)
         {
+            _statusList = new List<string>();
+
             CheckVents();
             CheckProducers();
+            CheckLightLevel();
+
+            Me.GetSurface(0).WriteText("Base Status\n");
+
+            foreach (string entry in _statusList)
+            {
+                Me.GetSurface(0).WriteText($"\n{entry}", true);
+            }
         }
 
         private void CheckVents()
@@ -119,10 +191,12 @@ namespace IngameScript
                 if (!vent.CanPressurize)
                     pressurised = false;
 
-            Color lightColor = (pressurised) ? _ventStatusLightColorPressurised : _ventStatusLightColorDepressurised;
+            Color lightColor = pressurised ? _ventLightColorNormal : _ventLightColorWarning;
 
             foreach (IMyLightingBlock light in _ventLights)
                 light.Color = lightColor;
+
+            _statusList.Add(pressurised ? "Base Pressurised" : "Base Depressurised");
         }
 
         private void CheckProducers()
@@ -135,6 +209,25 @@ namespace IngameScript
 
             foreach (IMyFunctionalBlock block in _producerStausBlocks)
                 block.Enabled = producing;
+
+            _statusList.Add(producing ? "Producer(s) Running" : "Producer(s) Standby");
+        }
+
+        private void CheckLightLevel()
+        {
+            if (_lightDetector != null)
+            {
+                bool light = _lightDetector.MaxOutput > _lightRequiredPower;
+
+                foreach (IMyFunctionalBlock block in _lightDetectorControlled)
+                    block.Enabled = !light;
+
+                string status = light ? "It's light outside." : "It's dark outside.";
+
+                _statusList.Add($"{status} ( {_lightDetector.MaxOutput:N2} / {_lightRequiredPower:N2} )");
+            }
+            else
+                _statusList.Add($"No light detector found under '{_lightDetectorName}'");
         }
     }
 }

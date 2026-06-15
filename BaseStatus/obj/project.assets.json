@@ -14,7 +14,7 @@
           "build/Mal.MDK2.PbAnalyzers.props": {}
         }
       },
-      "Mal.Mdk2.PbPackager/2.2.5": {
+      "Mal.Mdk2.PbPackager/2.2.6": {
         "type": "package",
         "compile": {
           "lib/netstandard2.0/_._": {}
@@ -427,17 +427,17 @@
         "tools/uninstall.ps1"
       ]
     },
-    "Mal.Mdk2.PbPackager/2.2.5": {
-      "sha512": "8lWpvAYNmSA6+F97s4o4K4D52qO6Gd99Lsth8IDFe1/4G9Kcl3sN74V/mOeqtPGKZ2gWHseDEDwywGiexDYhVg==",
+    "Mal.Mdk2.PbPackager/2.2.6": {
+      "sha512": "XIhZMF8w0O6Jktw0YI2O52jESjDhPQdv6g8uDjH3e0ZiY68v2KytomcgZRPJDkqBXeGnmq7pACHXBf52zj8AnQ==",
       "type": "package",
-      "path": "mal.mdk2.pbpackager/2.2.5",
+      "path": "mal.mdk2.pbpackager/2.2.6",
       "hasTools": true,
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "build/Mal.Mdk2.PbPackager.props",
         "lib/netstandard2.0/_._",
-        "mal.mdk2.pbpackager.2.2.5.nupkg.sha512",
+        "mal.mdk2.pbpackager.2.2.6.nupkg.sha512",
         "mal.mdk2.pbpackager.nuspec",
         "malware256.png",
         "readme.md",
@@ -2042,7 +2042,7 @@
   "projectFileDependencyGroups": {
     ".NETFramework,Version=v4.8": [
       "Mal.Mdk2.PbAnalyzers >= 2.1.16",
-      "Mal.Mdk2.PbPackager >= 2.2.5",
+      "Mal.Mdk2.PbPackager >= 2.2.6",
       "Mal.Mdk2.References >= 2.2.8",
       "Microsoft.NETFramework.ReferenceAssemblies >= 1.0.3"
     ]
@@ -2100,7 +2100,7 @@
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
             "suppressParent": "All",
             "target": "Package",
-            "version": "[2.2.5, )"
+            "version": "[2.2.6, )"
           },
           "Mal.Mdk2.References": {
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",

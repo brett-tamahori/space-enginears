@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "4f+x5/rwfZw=",
+  "dgSpecHash": "YpO5njh7dz4=",
   "success": true,
   "projectFilePath": "C:\\repos\\space-enginears\\BaseStatus\\BaseStatus.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\VRC PC\\.nuget\\packages\\mal.mdk2.pbanalyzers\\2.1.16\\mal.mdk2.pbanalyzers.2.1.16.nupkg.sha512",
-    "C:\\Users\\VRC PC\\.nuget\\packages\\mal.mdk2.pbpackager\\2.2.5\\mal.mdk2.pbpackager.2.2.5.nupkg.sha512",
+    "C:\\Users\\VRC PC\\.nuget\\packages\\mal.mdk2.pbpackager\\2.2.6\\mal.mdk2.pbpackager.2.2.6.nupkg.sha512",
     "C:\\Users\\VRC PC\\.nuget\\packages\\mal.mdk2.references\\2.2.8\\mal.mdk2.references.2.2.8.nupkg.sha512",
     "C:\\Users\\VRC PC\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\9.0.0\\microsoft.bcl.asyncinterfaces.9.0.0.nupkg.sha512",
     "C:\\Users\\VRC PC\\.nuget\\packages\\microsoft.build.framework\\17.14.28\\microsoft.build.framework.17.14.28.nupkg.sha512",

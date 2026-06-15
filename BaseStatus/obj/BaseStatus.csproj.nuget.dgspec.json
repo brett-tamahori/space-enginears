@@ -54,7 +54,7 @@
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[2.2.5, )"
+              "version": "[2.2.6, )"
             },
             "Mal.Mdk2.References": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",

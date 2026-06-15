@@ -23,3 +23,4 @@ C:\repos\space-enginears\BaseStatus\obj\Debug\netframework48\BaseStatus.csproj.C
 C:\repos\space-enginears\BaseStatus\obj\Debug\netframework48\BaseStatus.csproj.Up2Date
 C:\repos\space-enginears\BaseStatus\obj\Debug\netframework48\BaseStatus.dll
 C:\repos\space-enginears\BaseStatus\obj\Debug\netframework48\BaseStatus.pdb
+C:\repos\space-enginears\BaseStatus\obj\Debug\netframework48\BaseStatus.sourcelink.json
