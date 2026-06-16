@@ -41,10 +41,11 @@ namespace IngameScript
 
         Dictionary<String, AirLock> _airlocks;
 
+        List<string> _statusList;
+        List<string> _unknownAirlockGroups;
+
         public Program()
         {
-            PrintToScreen("", false);
-
             LoadIni();
 
             _airlocks = new Dictionary<String, AirLock>();
@@ -59,6 +60,8 @@ namespace IngameScript
 
                 Echo($"Found airlock: {airlock.Name}: {airlock}");
             }
+
+            _unknownAirlockGroups = new List<string>();
 
             Runtime.UpdateFrequency = UpdateFrequency.Update10;
         }
@@ -88,17 +91,22 @@ namespace IngameScript
 
         public void Main(string argument, UpdateType updateSource)
         {
+            _statusList = new List<string>();
+
             switch (updateSource)
             {
                 case UpdateType.Trigger:
-                    //PrintToScreen($"Called: {argument}");
-
                     AirLock airlock = _airlocks[argument];
 
                     if (airlock != null)
+                    {
                         airlock.StartCycle();
+
+                        if (_unknownAirlockGroups.Contains(argument))
+                            _unknownAirlockGroups.Remove(argument);
+                    }
                     else
-                        PrintToScreen($"Error: Could not find airlock for '{argument}'");
+                        _unknownAirlockGroups.Add(argument);
 
                     break;
                 case UpdateType.Update10:
@@ -107,26 +115,29 @@ namespace IngameScript
 
                     break;
             }
-        }
 
-        void PrintToScreen(String text, bool append = true)
-        {
-            Me.GetSurface(0).WriteText(text + '\n', append);
-        }
+            foreach (AirLock airlock in _airlocks.Values)
+                AddStatus(airlock.Status);
 
-        void CycleDoor(IMyDoor door)
-        {
-            switch (door.Status)
+            if (_unknownAirlockGroups.Count > 0)
             {
-                case DoorStatus.Closed:
-                    door.Enabled = true;
-                    door.OpenDoor();
-                    break;
-                case DoorStatus.Open:
-                    door.Enabled = true;
-                    door.CloseDoor();
-                    break;
+                AddStatus("\nUnknown Airlock Names\n");
+
+                foreach (string name in _unknownAirlockGroups)
+                    AddStatus(name);
             }
+
+            Me.GetSurface(0).WriteText("Airlock Controller\n");
+
+            foreach (string entry in _statusList)
+            {
+                Me.GetSurface(0).WriteText($"\n{entry}", true);
+            }
+        }
+
+        void AddStatus(string text)
+        {
+            _statusList.Add(text);
         }
 
         public class AirLock
@@ -159,20 +170,16 @@ namespace IngameScript
                     else if (door.CustomName.Contains(parent._airlockOuterTag))
                         _outerDoors.Add(door);
                 }
-
-                // parent.PrintToScreen("Airlock", false);
-
-                // foreach (IMyDoor door in _doors)
-                //     parent.PrintToScreen($"  Door {door.CustomName}");
-                // foreach (IMyDoor door in _innerDoors)
-                //     parent.PrintToScreen($"  Inner Door {door.CustomName}");
-                // foreach (IMyDoor door in _outerDoors)
-                //     parent.PrintToScreen($"  Outer Door {door.CustomName}");
             }
 
             public String Name
             {
                 get { return _group.Name; }
+            }
+
+            public String Status
+            {
+                get { return $"{Name}: {_status}"; }
             }
 
             /* If the airlock is in either end-state, then swtich to the matching 'closing' state and close all door. */
@@ -218,10 +225,10 @@ namespace IngameScript
                             break;
                     }
 
-                /* If already in an end state, nothing else needs to be done and we can exit. */
-                /* If in a closing state, if all doors are closed move to the matching sealed state, otherwise exit. */
-                /* If in a sealed state, move the status to the opposed opening state. */
-                /* If in an opening state, start opening any direction door; if all door are open move to the matching end state, otherwise exit */
+                /* If already in an end state, nothing else needs to be done and we can exit.
+                   If in a closing state, if all doors are closed move to the matching sealed state, otherwise exit.
+                   If in a sealed state, move the status to the opposed opening state.
+                   If in an opening state, start opening any direction door; if all door are open move to the matching end state, otherwise exit */
                 switch (_status)
                 {
                     case AirlockStatus.In:
