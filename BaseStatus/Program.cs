@@ -224,7 +224,7 @@ namespace IngameScript
 
                 string status = light ? "It's light outside." : "It's dark outside.";
 
-                _statusList.Add($"{status} ( {_lightDetector.MaxOutput:N2} / {_lightRequiredPower:N2} )");
+                _statusList.Add($"{status} ({_lightDetector.MaxOutput:N2}/{_lightRequiredPower:N2} MW)");
             }
             else
                 _statusList.Add($"No light detector found under '{_lightDetectorName}'");
