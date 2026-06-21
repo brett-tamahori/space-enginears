@@ -1,7 +1,7 @@
 {
-  "version": 3,
+  "version": 4,
   "targets": {
-    ".NETFramework,Version=v4.8": {
+    "netframework48": {
       "Mal.Mdk2.PbAnalyzers/2.1.16": {
         "type": "package",
         "compile": {
@@ -53,7 +53,7 @@
           }
         },
         "runtime": {
-          "lib/net462/Microsoft.Bcl.AsyncInterfaces.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
@@ -70,23 +70,13 @@
           "System.Text.Json": "9.0.0",
           "System.Threading.Tasks.Extensions": "4.6.0"
         },
-        "frameworkAssemblies": [
-          "System.IO",
-          "System.Net.Http",
-          "System.Runtime",
-          "System.Security.Cryptography.Algorithms",
-          "System.Security.Cryptography.Encoding",
-          "System.Security.Cryptography.Primitives",
-          "System.Security.Cryptography.X509Certificates",
-          "System.Xaml"
-        ],
         "compile": {
           "ref/net472/_._": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net472/Microsoft.Build.Framework.dll": {
+          "lib/net472/_._": {
             "related": ".pdb;.xml"
           }
         }
@@ -111,7 +101,7 @@
           }
         },
         "runtime": {
-          "lib/net472/Microsoft.Build.Utilities.Core.dll": {
+          "lib/net472/_._": {
             "related": ".pdb;.xml"
           }
         }
@@ -128,7 +118,7 @@
           }
         },
         "runtime": {
-          "lib/net472/Microsoft.IO.Redist.dll": {
+          "lib/net472/_._": {
             "related": ".xml"
           }
         }
@@ -145,7 +135,7 @@
           }
         },
         "runtime": {
-          "lib/net472/Microsoft.NET.StringTools.dll": {
+          "lib/net472/_._": {
             "related": ".pdb;.xml"
           }
         }
@@ -170,7 +160,7 @@
           }
         },
         "runtime": {
-          "lib/net462/System.Buffers.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
@@ -190,7 +180,7 @@
           }
         },
         "runtime": {
-          "lib/net462/System.Collections.Immutable.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
@@ -200,16 +190,13 @@
       },
       "System.Configuration.ConfigurationManager/9.0.0": {
         "type": "package",
-        "frameworkAssemblies": [
-          "System.Configuration"
-        ],
         "compile": {
           "lib/net462/_._": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net462/System.Configuration.ConfigurationManager.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
@@ -229,7 +216,7 @@
           }
         },
         "runtime": {
-          "lib/net462/System.Diagnostics.DiagnosticSource.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
@@ -257,7 +244,7 @@
           }
         },
         "runtime": {
-          "lib/net462/System.IO.Pipelines.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
@@ -278,7 +265,7 @@
           }
         },
         "runtime": {
-          "lib/net462/System.Memory.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
@@ -288,16 +275,13 @@
       },
       "System.Numerics.Vectors/4.6.0": {
         "type": "package",
-        "frameworkAssemblies": [
-          "System.Numerics"
-        ],
         "compile": {
           "lib/net462/_._": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net462/System.Numerics.Vectors.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
@@ -307,16 +291,13 @@
       },
       "System.Runtime.CompilerServices.Unsafe/6.1.0": {
         "type": "package",
-        "frameworkAssemblies": [
-          "mscorlib"
-        ],
         "compile": {
           "lib/net462/_._": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net462/System.Runtime.CompilerServices.Unsafe.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
@@ -337,7 +318,7 @@
           }
         },
         "runtime": {
-          "lib/net462/System.Text.Encodings.Web.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
@@ -363,12 +344,12 @@
           }
         },
         "runtime": {
-          "lib/net462/System.Text.Json.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
         "build": {
-          "buildTransitive/net462/System.Text.Json.targets": {}
+          "buildTransitive/net462/_._": {}
         }
       },
       "System.Threading.Tasks.Extensions/4.6.0": {
@@ -382,7 +363,7 @@
           }
         },
         "runtime": {
-          "lib/net462/System.Threading.Tasks.Extensions.dll": {
+          "lib/net462/_._": {
             "related": ".xml"
           }
         },
@@ -392,14 +373,11 @@
       },
       "System.ValueTuple/4.5.0": {
         "type": "package",
-        "frameworkAssemblies": [
-          "mscorlib"
-        ],
         "compile": {
           "ref/net47/_._": {}
         },
         "runtime": {
-          "lib/net47/System.ValueTuple.dll": {
+          "lib/net47/_._": {
             "related": ".xml"
           }
         }
@@ -2040,7 +2018,7 @@
     }
   },
   "projectFileDependencyGroups": {
-    ".NETFramework,Version=v4.8": [
+    "netframework48": [
       "Mal.Mdk2.PbAnalyzers >= 2.1.16",
       "Mal.Mdk2.PbPackager >= 2.2.6",
       "Mal.Mdk2.References >= 2.2.8",
@@ -2060,16 +2038,19 @@
       "outputPath": "C:\\repos\\space-enginears\\BaseStatus\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\VRC PC\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\VRC PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netframework48"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net48": {
+        "netframework48": {
+          "framework": "net48",
           "targetAlias": "netframework48",
           "projectReferences": {}
         }
@@ -2084,10 +2065,11 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "10.0.300"
     },
     "frameworks": {
-      "net48": {
+      "netframework48": {
+        "framework": "net48",
         "targetAlias": "netframework48",
         "dependencies": {
           "Mal.Mdk2.PbAnalyzers": {
@@ -2103,7 +2085,7 @@
             "version": "[2.2.6, )"
           },
           "Mal.Mdk2.References": {
-            "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+            "include": "Build",
             "suppressParent": "All",
             "target": "Package",
             "version": "[2.2.8, )"
@@ -2115,7 +2097,7 @@
             "autoReferenced": true
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.315\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301\\RuntimeIdentifierGraph.json"
       }
     }
   }

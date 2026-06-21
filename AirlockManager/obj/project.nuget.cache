@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "pNo6QXXUbBA=",
+  "dgSpecHash": "vgyK1EQOYEA=",
   "success": true,
   "projectFilePath": "C:\\repos\\space-enginears\\AirlockManager\\AirlockManager.csproj",
   "expectedPackageFiles": [
@@ -12,8 +12,6 @@
     "C:\\Users\\VRC PC\\.nuget\\packages\\microsoft.build.utilities.core\\17.14.28\\microsoft.build.utilities.core.17.14.28.nupkg.sha512",
     "C:\\Users\\VRC PC\\.nuget\\packages\\microsoft.io.redist\\6.1.0\\microsoft.io.redist.6.1.0.nupkg.sha512",
     "C:\\Users\\VRC PC\\.nuget\\packages\\microsoft.net.stringtools\\17.14.28\\microsoft.net.stringtools.17.14.28.nupkg.sha512",
-    "C:\\Users\\VRC PC\\.nuget\\packages\\microsoft.netframework.referenceassemblies\\1.0.3\\microsoft.netframework.referenceassemblies.1.0.3.nupkg.sha512",
-    "C:\\Users\\VRC PC\\.nuget\\packages\\microsoft.netframework.referenceassemblies.net48\\1.0.3\\microsoft.netframework.referenceassemblies.net48.1.0.3.nupkg.sha512",
     "C:\\Users\\VRC PC\\.nuget\\packages\\system.buffers\\4.6.0\\system.buffers.4.6.0.nupkg.sha512",
     "C:\\Users\\VRC PC\\.nuget\\packages\\system.collections.immutable\\9.0.0\\system.collections.immutable.9.0.0.nupkg.sha512",
     "C:\\Users\\VRC PC\\.nuget\\packages\\system.configuration.configurationmanager\\9.0.0\\system.configuration.configurationmanager.9.0.0.nupkg.sha512",

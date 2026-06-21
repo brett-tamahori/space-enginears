@@ -23,51 +23,48 @@ using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Network;
 using VRageMath;
 
-namespace IngameScript
-{
-    public partial class Program : MyGridProgram
-    {
+namespace IngameScript {
+    public partial class Program : MyGridProgram {
         const string INI_SECTION_GENERAL = "Airlock Manager - General Settings";
 
         const string AIRLOCK_GROUP_TAG = "Airlock Group Tag";
         const string AIRLOCK_INNER_TAG = "Airlock Inner Tag";
         const string AIRLOCK_OUTER_TAG = "Airlock Outer Tag";
 
+        const string FLAG_OPEN_IN = "in";
+        const string FLAG_OPEN_OUT = "out";
+
         MyIni _ini = new MyIni();
 
-        string _airlockGroupTag = "[Airlock]";
-        string _airlockInnerTag = "[Inner]";
-        string _airlockOuterTag = "[Outer]";
+        string _airlockGroupTag = "Airlock";
+        string _airlockInnerTag = "Inner";
+        string _airlockOuterTag = "Outer";
 
-        Dictionary<String, AirLock> _airlocks;
+        Dictionary<String, AirLock> _airlocks = new Dictionary<String, AirLock>();
 
-        List<string> _statusList;
-        List<string> _unknownAirlockGroups;
+        MyCommandLine _commandLine = new MyCommandLine();
 
-        public Program()
-        {
+        List<string> _statusList = new List<string>();
+        string _lastTrigger = "";
+
+        public Program() {
             LoadIni();
 
-            _airlocks = new Dictionary<String, AirLock>();
             List<IMyBlockGroup> airlockGroups = new List<IMyBlockGroup>();
 
             GridTerminalSystem.GetBlockGroups(airlockGroups, group => group.Name.Contains(_airlockGroupTag));
 
-            foreach (IMyBlockGroup group in airlockGroups)
-            {
+            foreach (IMyBlockGroup group in airlockGroups) {
                 AirLock airlock = new AirLock(this, group);
                 _airlocks.Add(airlock.Name, airlock);
 
                 Echo($"Found airlock: {airlock.Name}: {airlock}");
             }
 
-            _unknownAirlockGroups = new List<string>();
-
             Runtime.UpdateFrequency = UpdateFrequency.Update10;
         }
 
-        void LoadIni()
-        {
+        void LoadIni() {
             MyIniParseResult result;
             if (!_ini.TryParse(Me.CustomData, out result))
                 Echo($"CustomData error:\nLine {result}");
@@ -83,30 +80,36 @@ namespace IngameScript
 
             string iniOutput = _ini.ToString();
 
-            if (iniOutput != Me.CustomData)
-            {
+            if (iniOutput != Me.CustomData) {
                 Me.CustomData = iniOutput;
             }
         }
 
-        public void Main(string argument, UpdateType updateSource)
-        {
-            _statusList = new List<string>();
+        public void Main(string argument, UpdateType updateSource) {
+            _statusList.Clear();
 
-            switch (updateSource)
-            {
+            switch (updateSource) {
                 case UpdateType.Trigger:
-                    AirLock airlock = _airlocks[argument];
+                    if (_commandLine.TryParse(argument)) {
+                        string airlockName = _commandLine.Argument(0);
+                        bool inFlag = _commandLine.Switch(FLAG_OPEN_IN);
+                        bool outFlag = _commandLine.Switch(FLAG_OPEN_OUT);
 
-                    if (airlock != null)
-                    {
-                        airlock.StartCycle();
+                        _lastTrigger = $"\nRaw: '{argument}',\nName: '{airlockName}',\nIn: {inFlag}, Out: {outFlag}";
 
-                        if (_unknownAirlockGroups.Contains(argument))
-                            _unknownAirlockGroups.Remove(argument);
+                        AirLock airlock = _airlocks[airlockName];
+                        AirLock.AirlockCommand command;
+
+                        if (inFlag)
+                            command = AirLock.AirlockCommand.In;
+                        else if (outFlag)
+                            command = AirLock.AirlockCommand.Out;
+                        else
+                            command = AirLock.AirlockCommand.Cycle;
+
+                        if (airlock != null)
+                            airlock.StartCycle(command);
                     }
-                    else
-                        _unknownAirlockGroups.Add(argument);
 
                     break;
                 case UpdateType.Update10:
@@ -119,29 +122,20 @@ namespace IngameScript
             foreach (AirLock airlock in _airlocks.Values)
                 AddStatus(airlock.Status);
 
-            if (_unknownAirlockGroups.Count > 0)
-            {
-                AddStatus("\nUnknown Airlock Names\n");
-
-                foreach (string name in _unknownAirlockGroups)
-                    AddStatus(name);
-            }
+            AddStatus($"\nLast Trigger: '{_lastTrigger}'");
 
             Me.GetSurface(0).WriteText("Airlock Controller\n");
 
-            foreach (string entry in _statusList)
-            {
+            foreach (string entry in _statusList) {
                 Me.GetSurface(0).WriteText($"\n{entry}", true);
             }
         }
 
-        void AddStatus(string text)
-        {
+        void AddStatus(string text) {
             _statusList.Add(text);
         }
 
-        public class AirLock
-        {
+        public class AirLock {
             IMyBlockGroup _group;
             List<IMyDoor> _doors;
             List<IMyDoor> _innerDoors;
@@ -149,8 +143,7 @@ namespace IngameScript
 
             AirlockStatus _status = AirlockStatus.In;
 
-            public AirLock(Program parent, IMyBlockGroup group)
-            {
+            public AirLock(Program parent, IMyBlockGroup group) {
                 _group = group;
 
                 _doors = new List<IMyDoor>();
@@ -161,8 +154,7 @@ namespace IngameScript
 
                 group.GetBlocksOfType<IMyDoor>(doors);
 
-                foreach (IMyDoor door in doors)
-                {
+                foreach (IMyDoor door in doors) {
                     _doors.Add(door);
 
                     if (door.CustomName.Contains(parent._airlockInnerTag))
@@ -172,52 +164,64 @@ namespace IngameScript
                 }
             }
 
-            public String Name
-            {
+            public String Name {
                 get { return _group.Name; }
             }
 
-            public String Status
-            {
+            public String Status {
                 get { return $"{Name}: {_status}"; }
             }
 
             /* If the airlock is in either end-state, then swtich to the matching 'closing' state and close all door. */
-            public void StartCycle()
-            {
-                switch (_status)
-                {
-                    case AirlockStatus.In:
-                        _status = AirlockStatus.InClosing;
+            public void StartCycle(AirlockCommand command) {
+                AirlockStatus? targetStatus = null;
 
-                        foreach (IMyDoor door in _doors)
-                            if (DoorStatus.Open == door.Status)
-                            {
-                                door.Enabled = true;
-                                door.CloseDoor();
-                            }
+                if (AirlockStatus.In == _status && (AirlockCommand.Out == command || AirlockCommand.Cycle == command))
+                    targetStatus = AirlockStatus.InClosing;
+                else if (AirlockStatus.Out == _status && (AirlockCommand.In == command || AirlockCommand.Cycle == command))
+                    targetStatus = AirlockStatus.OutClosing;
 
-                        break;
-                    case AirlockStatus.Out:
-                        _status = AirlockStatus.OutClosing;
+                if (targetStatus.HasValue) {
+                    _status = targetStatus.Value;
 
-                        foreach (IMyDoor door in _doors)
-                            if (DoorStatus.Open == door.Status)
-                            {
-                                door.Enabled = true;
-                                door.CloseDoor();
-                            }
-
-                        break;
+                    foreach (IMyDoor door in _doors)
+                        if (DoorStatus.Open == door.Status) {
+                            door.Enabled = true;
+                            door.CloseDoor();
+                        }
                 }
+
+                // switch (_status)
+                // {
+                //     case AirlockStatus.In:
+                // _status = AirlockStatus.InClosing;
+                // 
+                // foreach (IMyDoor door in _doors)
+                // if (DoorStatus.Open == door.Status)
+                // {
+                // door.Enabled = true;
+                // door.CloseDoor();
+                // }
+                // 
+                // break;
+                //     case AirlockStatus.Out:
+                // _status = AirlockStatus.OutClosing;
+                // 
+                // foreach (IMyDoor door in _doors)
+                // if (DoorStatus.Open == door.Status)
+                // {
+                // door.Enabled = true;
+                // door.CloseDoor();
+                // }
+                // 
+                // break;
+                // }
             }
 
-            public void UpdateState()
-            {
+            public void UpdateState() {
                 /* Any doors that have finished moving should be powered down. */
                 foreach (IMyDoor door in _doors)
-                    switch (door.Status)
-                    {
+                    switch (door.Status) {
                         case DoorStatus.Closed:
                         case DoorStatus.Open:
                             door.Enabled = false;
@@ -229,8 +233,7 @@ namespace IngameScript
                    If in a closing state, if all doors are closed move to the matching sealed state, otherwise exit.
                    If in a sealed state, move the status to the opposed opening state.
                    If in an opening state, start opening any direction door; if all door are open move to the matching end state, otherwise exit */
-                switch (_status)
-                {
+                switch (_status) {
                     case AirlockStatus.In:
                     case AirlockStatus.Out:
                         return;
@@ -253,10 +256,8 @@ namespace IngameScript
 
                         return;
                     case AirlockStatus.InOpening:
-                        foreach (IMyDoor door in _innerDoors)
-                        {
-                            if (DoorStatus.Closed == door.Status)
-                            {
+                        foreach (IMyDoor door in _innerDoors) {
+                            if (DoorStatus.Closed == door.Status) {
                                 door.Enabled = true;
                                 door.OpenDoor();
                             }
@@ -267,10 +268,8 @@ namespace IngameScript
 
                         return;
                     case AirlockStatus.OutOpening:
-                        foreach (IMyDoor door in _outerDoors)
-                        {
-                            if (DoorStatus.Closed == door.Status)
-                            {
+                        foreach (IMyDoor door in _outerDoors) {
+                            if (DoorStatus.Closed == door.Status) {
                                 door.Enabled = true;
                                 door.OpenDoor();
                             }
@@ -283,8 +282,7 @@ namespace IngameScript
                 }
             }
 
-            private Boolean CheckDoorStatus(DoorStatus status, List<IMyDoor> doors)
-            {
+            private Boolean CheckDoorStatus(DoorStatus status, List<IMyDoor> doors) {
                 bool isStatus = true;
 
                 foreach (IMyDoor door in doors)
@@ -294,13 +292,20 @@ namespace IngameScript
                 return isStatus;
             }
 
-            public override string ToString()
-            {
+            public override string ToString() {
                 return $"{_group.Name} - Inner: {_innerDoors.Count}, Outer: {_outerDoors.Count}";
             }
 
-            private enum AirlockStatus
-            {
+            public enum AirlockCommand {
+                /* Cycle airlock to other state. */
+                Cycle,
+                /* Cycle airlock to In. */
+                In,
+                /* Cycle airlock to Out. */
+                Out
+            }
+
+            private enum AirlockStatus {
                 /* Inner open, outer closed. */
                 In,
                 /* Inner closing, outer closed. */

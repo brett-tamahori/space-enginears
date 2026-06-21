@@ -1,0 +1,8 @@
+C:\repos\space-enginears\BaseStatus\bin\x64\Debug\netframework48\BaseStatus.dll
+C:\repos\space-enginears\BaseStatus\bin\x64\Debug\netframework48\BaseStatus.pdb
+C:\repos\space-enginears\BaseStatus\obj\x64\Debug\netframework48\BaseStatus.csproj.AssemblyReference.cache
+C:\repos\space-enginears\BaseStatus\obj\x64\Debug\netframework48\BaseStatus.GeneratedMSBuildEditorConfig.editorconfig
+C:\repos\space-enginears\BaseStatus\obj\x64\Debug\netframework48\BaseStatus.csproj.CoreCompileInputs.cache
+C:\repos\space-enginears\BaseStatus\obj\x64\Debug\netframework48\BaseStatus.sourcelink.json
+C:\repos\space-enginears\BaseStatus\obj\x64\Debug\netframework48\BaseStatus.dll
+C:\repos\space-enginears\BaseStatus\obj\x64\Debug\netframework48\BaseStatus.pdb

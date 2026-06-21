@@ -1,0 +1,8 @@
+C:\repos\space-enginears\AirlockManager\bin\x64\Debug\netframework48\AirlockManager.dll
+C:\repos\space-enginears\AirlockManager\bin\x64\Debug\netframework48\AirlockManager.pdb
+C:\repos\space-enginears\AirlockManager\obj\x64\Debug\netframework48\AirlockManager.csproj.AssemblyReference.cache
+C:\repos\space-enginears\AirlockManager\obj\x64\Debug\netframework48\AirlockManager.GeneratedMSBuildEditorConfig.editorconfig
+C:\repos\space-enginears\AirlockManager\obj\x64\Debug\netframework48\AirlockManager.csproj.CoreCompileInputs.cache
+C:\repos\space-enginears\AirlockManager\obj\x64\Debug\netframework48\AirlockManager.sourcelink.json
+C:\repos\space-enginears\AirlockManager\obj\x64\Debug\netframework48\AirlockManager.dll
+C:\repos\space-enginears\AirlockManager\obj\x64\Debug\netframework48\AirlockManager.pdb
